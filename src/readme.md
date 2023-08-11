@@ -1,4 +1,49 @@
-﻿# Kafka notes
+﻿- [Kafka notes](#kafka-notes)
+- [1. Moving pieces](#1-moving-pieces)
+  * [1.1 Message](#11-message)
+  * [1.2 Batch](#12-batch)
+  * [1.3 Topic](#13-topic)
+- [2. Components](#2-components)
+  * [2.1 Producer](#21-producer)
+  * [2.2 Broker](#22-broker)
+  * [2.3 Consumer](#23-consumer)
+  * [2.4 Consumer groups](#24-consumer-groups)
+- [3. Apis](#3-apis)
+  * [3.1 Producer](#31-producer)
+  * [3.2 Consumer](#32-consumer)
+- [4. Design decisions](#4-design-decisions)
+  * [4.1 Simple storage](#41-simple-storage)
+  * [4.2 Message Id or Offsets](#42-message-id-or-offsets)
+  * [4.3 Batch](#43-batch)
+  * [4.4 Caching](#44-caching)
+  * [4.5 Broker stateless](#45-broker-stateless)
+  * [4.6 Message deletion](#46-message-deletion)
+  * [4.7 Side effect](#47-side-effect)
+- [5. Distributed coordination](#5-distributed-coordination)
+  * [5.1 Publishing](#51-publishing)
+  * [5.2 Consumer group](#52-consumer-group)
+  * [5.3 Zookeeper](#53-zookeeper)
+    + [5.3.1 Zookeeper registries](#531-zookeeper-registries)
+  * [5.4 Ephemeral and Persistent node](#54-ephemeral-and-persistent-node)
+  * [5.5 Zookeeper watcher](#55-zookeeper-watcher)
+  * [5.6 Rebalance process](#56-rebalance-process)
+- [6. Delivery guarantees](#6-delivery-guarantees)
+  * [6.1 Atleast once](#61-atleast-once)
+  * [6.2 Exactly once](#62-exactly-once)
+  * [6.3 In order delivery](#63-in-order-delivery)
+  * [6.4 Replication](#64-replication)
+- [7. Cheatsheet](#7-cheatsheet)
+  * [7.1 Access broker cli](#71-access-broker-cli)
+  * [7.2 topic](#72-topic)
+  * [7.3 producer test](#73-producer-test)
+  * [7.4 consume test](#74-consume-test)
+  * [7.5 consumer group info](#75-consumer-group-info)
+  * [7.5 create a consumer and join a consumer group to consume](#75-create-a-consumer-and-join-a-consumer-group-to-consume)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
+# Kafka notes
 
 # 1. Moving pieces
 ## 1.1 Message
