@@ -227,7 +227,7 @@ open a new cli, go to broker bash /bin
 kafka-console-consumer --bootstrap-server localhost:9092 --topic test --from-beginning
 ```
 
-exiting here will cause the process to commit the offset
+exiting here will cause the process to commit the offset. notice it was ok to not commit because one partition can only be consumed by 1 consumer anyway so there isn't anything it needs to coordinate with another consumer with.
 
 ## 7.5 consumer group info
 get the consumer group. by default new consumers without specifying a consumer group will have auto created a consumer group
@@ -239,7 +239,7 @@ describe it
 kafka-consumer-groups --bootstrap-server localhost:9092 --group CONSUMERGROUPFROMABOVE --describe
 ```
 
-## 7.5 create a consumer and join a consumer group
+## 7.5 create a consumer and join a consumer group to consume
 Join group and start where offset was left off
 ```
 kafka-console-consumer --bootstrap-server localhost:9092 --topic test --group consumer-group-98828
@@ -247,4 +247,8 @@ kafka-console-consumer --bootstrap-server localhost:9092 --topic test --group co
 can start from beginning as well
 ```
 kafka-console-consumer --bootstrap-server localhost:9092 --topic test --group consumer-group-98828 --from-beginning
+```
+start from a specific offset. Notice "Options group and partition cannot be specified together.""
+```
+kafka-console-consumer --bootstrap-server localhost:9092 --topic test --property print.key=true --property key.separator="-" --partition 0 --offset 3
 ```
