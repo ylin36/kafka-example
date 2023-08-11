@@ -178,7 +178,73 @@ Broker and consumer registry can have watchers registered on them by each consum
 * a change in consumer registry occurs when a consumer fails or a new consumer is added
 watcher also trigger a load rebalance whenever consumer or broker change occurs, or when a new consumer is initialized
 
+## 5.6 Rebalance process
+* stops consumption during the process until it is done
+* causes consumers who redefined their ownership refresh their cache which slows down consumptions more
 
+# 6. Delivery guarantees
+## 6.1 Atleast once
+Default is atleast once
+## 6.2 Exactly once
+This needs code logic in app. Some techniques below
+* use unique id
+* app can track consumed record with its offset in a transaction together. (if supported)
+## 6.3 In order delivery
+messages in partition in a specific order will be consumed in same order
+## 6.4 Replication
+Kafka can replicate partition multiple times and designate one as leader. producer and consumer can only do it to the partition leader.
+All other partitions need to sync with leader replica so if leader is lost they can re-elect a new one.
+There are in sync replica (recent configured heartbeat received, recent message synced from leader) and out of sync replicas. kafka can only pick in sync replica as leader while rest syncs.
 
+# 7. Cheatsheet
+## 7.1 Access broker cli
+get in kafka broker. and treat itself as the bootstrap server (for getting metadata). Go to bin directory where executables are
+``` 
+docker exec -it broker bash
+cd /bin
+```
 
+## 7.2 topic
+creating a new topic
+```
+kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic test
+```
+check created topic
+```
+kafka-topics --bootstrap-server=localhost:9092 --list
+```
 
+## 7.3 producer test
+Open a new cli, go to broker bash /bin
+```
+kafka-console-producer --bootstrap-server localhost:9092 --topic test
+start producing messages
+```
+
+## 7.4 consume test
+open a new cli, go to broker bash /bin
+```
+kafka-console-consumer --bootstrap-server localhost:9092 --topic test --from-beginning
+```
+
+exiting here will cause the process to commit the offset
+
+## 7.5 consumer group info
+get the consumer group. by default new consumers without specifying a consumer group will have auto created a consumer group
+```
+kafka-consumer-groups --bootstrap-server localhost:9092 --list
+```
+describe it
+```
+kafka-consumer-groups --bootstrap-server localhost:9092 --group CONSUMERGROUPFROMABOVE --describe
+```
+
+## 7.5 create a consumer and join a consumer group
+Join group and start where offset was left off
+```
+kafka-console-consumer --bootstrap-server localhost:9092 --topic test --group consumer-group-98828
+```
+can start from beginning as well
+```
+kafka-console-consumer --bootstrap-server localhost:9092 --topic test --group consumer-group-98828 --from-beginning
+```
