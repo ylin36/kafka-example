@@ -136,6 +136,12 @@ partition 4 [1][2][3][4] ---> Consumer 3 (consumer group 1)
 ```
 # 3. Apis
 https://docs.confluent.io/kafka-clients/dotnet/current/overview.html
+
+use nuget:
+Confluent.Kafka package,
+optional:
+Confluent.SchemaRegistry, Confluent.SchemaRegistry.Serdes.Protobuf, Confluent.SchemaRegistry.Serdes.Json and Confluent.SchemaRegistry.Serdes.Avro
+
 ## 3.1 Producer
 
 ## 3.2 Consumer

@@ -1,16 +1,28 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using NLog;
 // Microsoft.Extension.Logging DI
 using NLog.Extensions.Logging;
+using Confluent.Kafka;
 
 // Early init of NLog to allow startup and exception logging, before host is built
 var logger = LogManager.Setup().GetCurrentClassLogger();
 logger.Info("Init program");
 
+var builder = WebApplication.CreateBuilder(args);
+
+var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+
+var kafkaConfigs = new List<string> { "bootstrap.servers" };
+    
+configuration["bootstrap.servers"] = "localhost:9092";
+
+using var producer = new ProducerBuilder<string, string>(configuration.AsEnumerable().Where(c => kafkaConfigs.Contains(c.Key))).Build();
+
 try
 {
-    var builder = WebApplication.CreateBuilder(args);
+    builder.Services
+        .AddSingleton<IConfiguration>(configuration)
+        .AddSingleton(producer);
 
     builder.Services.AddControllers();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -60,6 +72,7 @@ catch (Exception e)
 }
 finally
 {
+    producer.Flush(TimeSpan.FromSeconds(10));
     // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
     NLog.LogManager.Shutdown();
 }

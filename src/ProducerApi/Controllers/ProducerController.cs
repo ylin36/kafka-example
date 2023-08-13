@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProducerApi.Controllers;
+using Confluent.Kafka;
+using ProducerApi.Models;
 
 namespace DesignPatterns.Controllers
 {
@@ -8,14 +10,16 @@ namespace DesignPatterns.Controllers
     public class ProducerController : ControllerBase
     {
         private readonly ILogger<ProducerController> _logger;
+        private readonly IProducer<string, string> _kafkaProducer;
 
         /// <summary>
         /// New instance of controller is created for each api call.
         /// </summary>
         /// <param name="logger"></param>
-        public ProducerController(ILogger<ProducerController> logger)
+        public ProducerController(ILogger<ProducerController> logger, IProducer<string, string> kafkaProducer)
         {
             _logger = logger;
+            _kafkaProducer = kafkaProducer;
         }
 
         /// <summary>
@@ -26,7 +30,11 @@ namespace DesignPatterns.Controllers
         /// Sample request:
         ///
         ///     Post /produce
-        ///     "New York"
+        ///     {
+        ///         "topic": "testtopic"
+        ///         "key": "testkey",
+        ///         "value": "testvalue"  
+        ///     }
         ///
         /// </remarks>
         /// <response code="201">Record created</response>
@@ -37,15 +45,15 @@ namespace DesignPatterns.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<int> PostProduce([FromBody] string message)
+        public async Task<ActionResult<int>> PostProduce([FromBody] RequestMessage message)
         {
             try
             {
-                var builder = new Boeing747Builder();
-                var director = new AirCraftDirector(builder);
-                director.Construct(false);
-                var boeing747 = builder.GetResult();
-                return StatusCode(201, boeing747.Fly(destination));
+                _logger.LogInformation("start producing");
+                var result = await _kafkaProducer.ProduceAsync(message.Topic, new Message<string, string>() { Key = message.Key, Value = message.Value });
+
+                _logger.LogInformation($"Created {result.Value}, on partition {result.Partition.Value} topic {result.Topic} offset {result.Offset.Value}");
+                return StatusCode(201, result);
             }
             catch (Exception e)
             {

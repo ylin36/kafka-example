@@ -1,26 +1,22 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
-  <PropertyGroup>
-     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <UserSecretsId>dotnet-ConsumerBackgroundTasks-767aef33-c820-4d74-b4c1-5f3e2058f45b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="NLog" Version="5.2.3" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.3" />
     <PackageReference Include="Confluent.Kafka" Version="2.2.0" />
   </ItemGroup>
-
   <ItemGroup>
-    <None Remove="Models\" />
+    <None Remove="Factories\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\" />
+    <Folder Include="Factories\" />
   </ItemGroup>
 </Project>
