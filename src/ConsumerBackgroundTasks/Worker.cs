@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿using System;
+using System.Dynamic;
+using System.Numerics;
+using System.Threading.Tasks.Dataflow;
 using Confluent.Kafka;
 using ConsumerBackgroundTasks.Factories;
 
@@ -42,7 +45,8 @@ public class Worker : BackgroundService
                 new ExecutionDataflowBlockOptions
                 {
                     // 3 threads to process in parallel
-                    MaxDegreeOfParallelism = 3
+                    MaxDegreeOfParallelism = 3,
+                    BoundedCapacity = 3
                 });
 
                 while (!stoppingToken.IsCancellationRequested)
@@ -54,12 +58,22 @@ public class Worker : BackgroundService
                     _logger.LogInformation($"Received message {result.Message.Value} timestamp: {result.Message.Timestamp} , sending it for processing");
 
                     // send for actionblock for processing
-                    actionBlock.Post(result);
+                    // https://stackoverflow.com/questions/62016856/avoiding-use-of-actionblocktinput-post-when-postdataflowblockoptions-boundedca
+                    // Post returns false when
+                    // The block is marked as completed (by calling its Complete method).
+                    // The block is completed, either successfully or unsuccessfully(its Completion.IsCompleted property returns true).
+                    // The block has a bounded capacity(option BoundedCapacity != -1), and its buffer is currently full.
+                    // DO NOT USE Post since we don't want a false when bound is full. we want to block until it is available again
+                    // actionBlock.Post(result);
+
+                    // The block was marked as completed either before calling the SendAsync, or during the awaiting.
+                    // The block was completed either before calling the SendAsync, or during the awaiting as a result of an exception, or because its Fault method was invoked.
+                    // using SendSync to await until BoundedCapacity is free again. See ConsumerTest TPLTests for details.
+                    await actionBlock.SendAsync(result);
 
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                     await Task.Delay(1000, stoppingToken);
                 }
-                
             }
             catch (Exception e)
             {
