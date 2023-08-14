@@ -41,12 +41,13 @@ public class Worker : BackgroundService
                 _logger.LogInformation($"Subscribed to topic {topic}");
 
                 // process the consume result in another thread
+                var maxConcurrency = Math.Min(3, Environment.ProcessorCount);
                 var actionBlock = new ActionBlock<ConsumeResult<string, string>>(HandleMessageAsync,
                 new ExecutionDataflowBlockOptions
                 {
                     // 3 threads to process in parallel
-                    MaxDegreeOfParallelism = 3,
-                    BoundedCapacity = 3
+                    MaxDegreeOfParallelism = maxConcurrency,
+                    BoundedCapacity = maxConcurrency
                 });
 
                 while (!stoppingToken.IsCancellationRequested)
@@ -68,8 +69,10 @@ public class Worker : BackgroundService
 
                     // The block was marked as completed either before calling the SendAsync, or during the awaiting.
                     // The block was completed either before calling the SendAsync, or during the awaiting as a result of an exception, or because its Fault method was invoked.
-                    // using SendSync to await until BoundedCapacity is free again. See ConsumerTest TPLTests for details.
+                    // using SendSync to await until BoundedCapacity is free again. See ConsumerTest TPLTests for details. BoundedCapacity only decreases after a Action method finishes its execution
                     await actionBlock.SendAsync(result);
+
+                    // consider only commiting after it is atleast sent down successfully to a method for processing
 
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                     await Task.Delay(1000, stoppingToken);

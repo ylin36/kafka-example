@@ -95,9 +95,9 @@ public class TPLTests
         // Conclusion: from the results below, we can conclude 2) is true. Only after completion of the action method will reduce the buffer in queue by one; sending it down to the method doesn't dequeue quite yet.
         var processorCount = Environment.ProcessorCount;
         _output.WriteLine($"Testing actionblock.Post with Processor count {processorCount}");
-        var actionBlock = new ActionBlock<int>(value =>
+        var actionBlock = new ActionBlock<int>(async value =>
         {
-            Thread.Sleep(5000);
+            await Task.Delay(5000);
             _output.WriteLine($"Processed {value} on processor id: {Thread.GetCurrentProcessorId()}");
         },
         new ExecutionDataflowBlockOptions
