@@ -1,7 +1,18 @@
 ﻿# https://www.baeldung.com/ops/kafka-docker-setup
 ---
-version: '2'
+version: '3.7'
 services:
+
+  db:
+    image: postgres
+    hostname: db # only affects /etc/host file what container thinks its name is
+    container_name: db # usable name for dns like service name. defaults to service name if not specified
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: example
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.1
     hostname: zookeeper

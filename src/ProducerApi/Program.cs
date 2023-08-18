@@ -3,6 +3,8 @@ using NLog;
 // Microsoft.Extension.Logging DI
 using NLog.Extensions.Logging;
 using Confluent.Kafka;
+using ProducerApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 // Early init of NLog to allow startup and exception logging, before host is built
 var logger = LogManager.Setup().GetCurrentClassLogger();
@@ -10,7 +12,8 @@ logger.Info("Init program");
 
 var builder = WebApplication.CreateBuilder(args);
 
-var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+// addUserSecret to use secret file during development. mark this true, so that during prod, the secrets come from elsewhere such as env variable
+var configuration = new ConfigurationBuilder().AddEnvironmentVariables().AddUserSecrets(Assembly.GetExecutingAssembly(), true).Build();
 
 var kafkaConfigs = new List<string> { "bootstrap.servers" };
     
@@ -42,6 +45,10 @@ try
         loggingBuilder.ClearProviders();
         loggingBuilder.AddNLog();
     });
+
+    builder.Services.AddDbContext<KafkapubsubContext>(
+            options => options.UseNpgsql(configuration["connection.string"]));
+
     builder.Services.Configure<RouteOptions>(option =>
     {
         option.LowercaseUrls = true;
