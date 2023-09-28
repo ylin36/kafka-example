@@ -21,14 +21,43 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="MediatR" Version="12.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="Models\" />
-    <None Remove="db\" />
+    <None Remove="Presentation\" />
+    <None Remove="Presentation\Controllers\" />
+    <None Remove="Infrastructure\" />
+    <None Remove="Domain\" />
+    <None Remove="Application\" />
+    <None Remove="Domain\Entities\" />
+    <None Remove="Application\Abstractions\" />
+    <None Remove="Application\Product\Commands\" />
+    <None Remove="Application\Product\Events\" />
+    <None Remove="Application\Product\Queries\" />
+    <None Remove="Infrastructure\Services\" />
+    <None Remove="Infrastructure\Persistence\" />
+    <None Remove="Infrastructure\Persistence\db\" />
+    <None Remove="Application\Commands\" />
+    <None Remove="Application\Queries\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
-    <Folder Include="db\" />
+    <Folder Include="Presentation\" />
+    <Folder Include="Presentation\Controllers\" />
+    <Folder Include="Infrastructure\" />
+    <Folder Include="Domain\" />
+    <Folder Include="Application\" />
+    <Folder Include="Domain\Entities\" />
+    <Folder Include="Application\Abstractions\" />
+    <Folder Include="Application\Queries\Commands\" />
+    <Folder Include="Application\Queries\Events\" />
+    <Folder Include="Application\Queries\Queries\" />
+    <Folder Include="Infrastructure\Services\" />
+    <Folder Include="Infrastructure\Persistence\" />
+    <Folder Include="Infrastructure\Persistence\db\" />
+    <Folder Include="Application\Commands\" />
+    <Folder Include="Application\Queries\" />
   </ItemGroup>
 </Project>

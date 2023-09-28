@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProducerApi.Controllers;
 using Confluent.Kafka;
-using ProducerApi.Models;
+using ProducerApi.Domain.Entities;
+using MediatR;
+using ProducerApi.Application.Commands;
 
-namespace DesignPatterns.Controllers
+namespace DesignPatterns.Presentation.Controllers
 {
     [ApiController]
     [Route("/api/v1/[controller]")]
@@ -12,17 +13,19 @@ namespace DesignPatterns.Controllers
         private readonly ILogger<ProducerController> _logger;
         private readonly IProducer<string, string> _kafkaProducer;
         private readonly KafkapubsubContext _dbContext;
+        private readonly IMediator _mediator;
 
         /// <summary>
         /// New instance of controller is created for each api call, so the none threadsafe DI here can be in general used safely
         /// </summary>
         /// <param name="logger"></param>
-        public ProducerController(ILogger<ProducerController> logger, IProducer<string, string> kafkaProducer, KafkapubsubContext dbContext)
+        public ProducerController(ILogger<ProducerController> logger, IMediator mediator, IProducer<string, string> kafkaProducer, KafkapubsubContext dbContext)
         {
             _logger = logger;
             _kafkaProducer = kafkaProducer;
             _dbContext = dbContext;
-            }
+            _mediator = mediator;
+        }
 
         /// <summary>
         /// Post a message to kafka
@@ -47,11 +50,13 @@ namespace DesignPatterns.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<int>> PostProduce([FromBody] RequestMessage message)
+        public async Task<ActionResult<int>> PostProduce([FromBody] CreatePortfolioCommand command)
         {
             try
             {
                 _logger.LogInformation("start producing");
+
+
                 var result = await _kafkaProducer.ProduceAsync(message.Topic, new Message<string, string>() { Key = message.Key, Value = message.Value });
 
                 _logger.LogInformation($"Created {result.Value}, on partition {result.Partition.Value} topic {result.Topic} offset {result.Offset.Value}");

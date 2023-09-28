@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ProducerApi.Models;
+namespace ProducerApi.Domain.Entities;
 
 public partial class Portfolio
 {

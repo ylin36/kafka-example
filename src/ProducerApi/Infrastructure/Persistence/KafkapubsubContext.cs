@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using ProducerApi.Application.Abstractions;
+using ProducerApi.Domain.Entities;
 
-namespace ProducerApi.Models;
+namespace ProducerApi.Infrastructure.Persistence;
 
-public partial class KafkapubsubContext : DbContext
+public partial class KafkapubsubContext : DbContext, IPortfolioRepository, IProductRepository
 {
     public KafkapubsubContext()
     {
@@ -18,6 +20,18 @@ public partial class KafkapubsubContext : DbContext
     public virtual DbSet<Portfolio> Portfolios { get; set; }
 
     public virtual DbSet<Product> Products { get; set; }
+
+    public async Task<int> SavePortfoliosAsync(List<Portfolio> portfolios)
+    {
+        Portfolios.AddRange(portfolios);
+        return await SaveChangesAsync();
+    }
+
+    public async Task<int> SaveProductAsync(List<Portfolio> portfolios)
+    {
+        Products.AddRange(Products);
+        return await SaveChangesAsync();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

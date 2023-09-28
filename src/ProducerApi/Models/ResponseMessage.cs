@@ -6,8 +6,6 @@ namespace ProducerApi.Models
 		public ResponseMessage()
 		{
 		}
-
-		
 	}
 }
 

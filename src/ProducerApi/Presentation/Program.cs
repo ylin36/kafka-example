@@ -3,8 +3,11 @@ using NLog;
 // Microsoft.Extension.Logging DI
 using NLog.Extensions.Logging;
 using Confluent.Kafka;
-using ProducerApi.Models;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
+using MediatR.Pipeline;
+using ProducerApi.Infrastructure.Persistence;
+using ProducerApi.Application.Abstractions;
 
 // Early init of NLog to allow startup and exception logging, before host is built
 var logger = LogManager.Setup().GetCurrentClassLogger();
@@ -49,11 +52,22 @@ try
     builder.Services.AddDbContext<KafkapubsubContext>(
             options => options.UseNpgsql(configuration["connection.string"]));
 
+    builder.Services
+        .AddTransient<IPortfolioRepository, KafkapubsubContext>()
+        .AddTransient<IProductRepository, KafkapubsubContext>();
+
+
     builder.Services.Configure<RouteOptions>(option =>
     {
         option.LowercaseUrls = true;
         option.LowercaseQueryStrings = true;
     });
+
+    // registers IMediator, ISender, IPublisher as transient
+    // IRequestHandler<,>, IRequestHandler<>, INotificationHandler<>, IStreamRequestHandler<>,
+    // IRequestExceptionHandler<,,> IRequestExceptionAction<,>) concrete implementations as transient
+    // https://github.com/jbogard/MediatR/wiki
+    builder.Services.AddMediatR(config => config.RegisterServicesFromAssemblies(typeof(Program).Assembly));
 
     var app = builder.Build();
 
